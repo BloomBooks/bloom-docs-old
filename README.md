@@ -25,5 +25,7 @@ That should open up the site in a browser for you.
 Now go to the `docs` directory and edit one of the documents you see there. When you save, the browser should show your changes.
 
 ## Adding Screenshots
-To add a screenshot, use CTRL + Alt + v. This tells the [Paste Image](https://github.com/mushanshitiancai/vscode-paste-image) extension to save the image to `static/img` and insert the markdown the way Docusaurus wants it. 
+To add a screenshot, use CTRL + Alt + v. This tells the [Paste Image](https://github.com/mushanshitiancai/vscode-paste-image) extension to save the image to an "img" directory next to the current file and insert the markdown the way Docusaurus wants it. 
 
+## Keeping Images and Text Together
+In order to create a folder that only exists to keeps various MD files together with a single "img" folder, create a folder and end it with a dash. This folder will make a new level in the sidebar. (Our custom sidebarItemsGenerator understands this dash).

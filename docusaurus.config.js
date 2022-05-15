@@ -35,6 +35,24 @@ const config = {
       }),
     ],
   ],
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr"],
+    localeConfigs: {
+      en: {
+        label: "English",
+        direction: "ltr",
+        htmlLang: "en-US",
+        calendar: "gregory",
+      },
+      fr: {
+        label: "français",
+        direction: "ltr",
+        htmlLang: "fr",
+        calendar: "gregory",
+      },
+    },
+  },
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -45,6 +63,13 @@ const config = {
           alt: "My Site Logo",
           src: "img/logo.svg",
         },
+
+        items: [
+          {
+            type: "localeDropdown",
+            position: "right",
+          },
+        ],
       },
 
       prism: {

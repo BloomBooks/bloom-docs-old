@@ -8,6 +8,7 @@ const sidebarItemsGenerator = require("./sidebarItemsGenerator");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Bloom Docs",
+  staticDirectories: ["static"],
   tagline: "Let's grow a library",
   url: "https://docs.bloomlibrary.com",
   baseUrl: "/",

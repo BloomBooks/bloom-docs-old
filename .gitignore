@@ -21,3 +21,5 @@ yarn-error.log*
 
 bloom-docs.pdf
 i18n
+
+pdf/

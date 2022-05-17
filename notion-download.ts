@@ -97,7 +97,7 @@ async function getPagesRecursively(id: string, parentPath: string) {
 
 async function getContentPage(id: string, parentPath: string) {
   const contentPage = await getOnePage(id);
-  console.log(JSON.stringify(contentPage, null, 2));
+  //console.log(JSON.stringify(contentPage, null, 2));
   if (!("properties" in contentPage)) {
     throw Error("Expected a properties element on the page");
   }
@@ -119,16 +119,8 @@ async function getContentPage(id: string, parentPath: string) {
       } else {
         url = b.image.external.url; // image still pointing somewhere else. I've see this happen when copying a Google Doc into Notion. Notion kep pointing at the google doc.
       }
-      console.log(url);
-      /*
-      Is the key here the d1058f46-4d2f-4292-8388-4ad393383439? Need to try tuesday.
+      //console.log(url);
 
-      aws one for the "marketplace" logo on the "other" md
-      https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d1058f46-4d2f-4292-8388-4ad393383439/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220516%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220516T233630Z&X-Amz-Expires=3600&X-Amz-Signature=f215704094fcc884d37073b0b108cf6d1c9da9b7d57a898da38bc30c30b4c4b5&X-Amz-SignedHeaders=host&x-id=GetObject
-      from "view original"
-      https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d1058f46-4d2f-4292-8388-4ad393383439/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220516%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220516T234003Z&X-Amz-Expires=86400&X-Amz-Signature=cd514b3de76beaf264f3ce36a53a7ece4f00d3df74b2c871cd5120713724d7a4&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject
-      */
-      //www.notion.so/hattonjohn/How-to-distribute-Bloom-books-on-SD-Cards-861f3795f18a4841804fff2bed0a78bd#69e865397ae846da8141c8ae6bde9056
       const newPath =
         kNotionImageDirectoryFromDocusaurusRuntime +
         "/" +
@@ -144,7 +136,7 @@ async function getContentPage(id: string, parentPath: string) {
 
   const mdBlocks = await n2m.blocksToMarkdown(blocks);
   const mdString =
-    "---\r\ntitle: ${title}\r\n---\r\n\r\n" + n2m.toMarkdownString(mdBlocks);
+    `---\r\ntitle: ${title}\r\n---\r\n\r\n` + n2m.toMarkdownString(mdBlocks);
 
   //helpful when debugging changes we make before serializing to markdown
   // fs.writeFileSync(
@@ -223,7 +215,24 @@ async function saveImage(
   const fileType = await FileType.fromBuffer(buffer);
   if (fileType?.ext) {
     // too hard to figure out the original file name, if there was one, so make a hash of the url
-    const hash = hashOfString(url);
+
+    /*
+           https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d1058f46-4d2f-4292-8388-4ad393383439/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220516%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220516T233630Z&X-Amz-Expires=3600&X-Amz-Signature=f215704094fcc884d37073b0b108cf6d1c9da9b7d57a898da38bc30c30b4c4b5&X-Amz-SignedHeaders=host&x-id=GetObject
+      from "view original"
+      https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d1058f46-4d2f-4292-8388-4ad393383439/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220516%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220516T234003Z&X-Amz-Expires=86400&X-Amz-Signature=cd514b3de76beaf264f3ce36a53a7ece4f00d3df74b2c871cd5120713724d7a4&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject
+      https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d1058f46-4d2f-4292-8388-4ad393383439/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220517%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220517T134055Z&X-Amz-Expires=3600&X-Amz-Signature=dc6f05833bc2f426430afcad6d7c73c4ff9c741e2c8a4f1e6e3d8af886262860&X-Amz-SignedHeaders=host&x-id=GetObject
+      */
+    // images that are stored by notion come to use with a complex url that changes over time. Pick out the UUID that doesn't change.
+
+    let thingToHash = url;
+    const m = /.*secure\.notion-static\.com\/(.*)\//gm.exec(url);
+    //console.log(`m: ${JSON.stringify(m)}`);
+    if (m && m.length > 1) {
+      console.log("got aws image");
+      thingToHash = m[1];
+    }
+
+    const hash = hashOfString(thingToHash);
     const outputFileName = `${hash}.${fileType.ext}`;
     const path = imageFolderPath + "/" + outputFileName;
     if (!fs.pathExistsSync(path)) {

@@ -10,6 +10,8 @@ import {
 } from "@notionhq/client/build/src/api-endpoints";
 import { RateLimiter } from "limiter";
 import fetch from "node-fetch";
+import { __String } from "typescript";
+import sanitize from "sanitize-filename";
 
 const notionLimiter = new RateLimiter({
   tokensPerInterval: 3,
@@ -61,9 +63,8 @@ async function getPagesRecursively(id: string, parentPath: string) {
   // and Typescript will give type errors unless it sees code that proves that your
   // object is an instance of the union element that you are using.
   if ("properties" in outlinePage) {
-    const t = outlinePage.properties.title;
-    if ("title" in t && "text" in t.title[0]) {
-      const title = t.title[0].text.content;
+    const title = getPlainTextProperty(outlinePage, "title");
+    if (title) {
       console.log(`Reading "${parentPath}/${title}"`);
       const children = await notion.blocks.children.list({
         block_id: id,
@@ -97,54 +98,61 @@ async function getPagesRecursively(id: string, parentPath: string) {
 
 async function getContentPage(id: string, parentPath: string) {
   const contentPage = await getOnePage(id);
-  //console.log(JSON.stringify(contentPage, null, 2));
-  if (!("properties" in contentPage)) {
-    throw Error("Expected a properties element on the page");
-  }
-  if (!("Name" in contentPage.properties)) {
-    throw Error("Expected a Name element on the page");
-  }
-  if (!("title" in contentPage.properties.Name)) {
-    throw Error("Expected a properties.Name.title element on the page");
-  }
-  const title = contentPage.properties.Name.title[0].plain_text;
-
   const blocks = (await getBlockChildren(id)).results;
 
   for (const b of blocks) {
     if ("image" in b) {
-      let url = "";
-      if ("file" in b.image) {
-        url = b.image.file.url; // image saved on notion (actually AWS)
-      } else {
-        url = b.image.external.url; // image still pointing somewhere else. I've see this happen when copying a Google Doc into Notion. Notion kep pointing at the google doc.
-      }
-      //console.log(url);
-
-      const newPath =
-        kNotionImageDirectoryFromDocusaurusRuntime +
-        "/" +
-        (await saveImage(url, kNotionImageDirectory));
-
-      if ("file" in b.image) {
-        b.image.file.url = newPath;
-      } else {
-        b.image.external.url = newPath;
-      }
+      processImageBlock(b);
     }
   }
 
+  const title = getPlainTextProperty(contentPage, "Name");
+  const slug = getPlainTextProperty(contentPage, "slug");
   const mdBlocks = await n2m.blocksToMarkdown(blocks);
-  const mdString =
-    `---\r\ntitle: ${title}\r\n---\r\n\r\n` + n2m.toMarkdownString(mdBlocks);
+  let mdString = "---\n";
+  mdString += `title: ${title}\n`;
+  if (slug) {
+    mdString += `slug: ${slug}\n`;
+  }
+  mdString += "---\n\n";
+  mdString += n2m.toMarkdownString(mdBlocks);
 
   //helpful when debugging changes we make before serializing to markdown
   // fs.writeFileSync(
   //   parentPath + "/" + id + ".json",
-  //   JSON.stringify(blocks, null, 2)
+  //   JSON.stringify({ contentPage, blocks }, null, 2)
   // );
 
-  fs.writeFileSync(parentPath + "/" + id + ".md", mdString);
+  fs.writeFileSync(parentPath + "/" + sanitize(title!) + ".md", mdString);
+}
+
+function getPlainTextProperty(o: object, property: string): string | undefined {
+  /* Notion strings look like this
+   "properties": {
+      "slug": {
+        "type": "rich_text",
+        ...
+        "rich_text": [
+          {
+            ...
+            "plain_text": "/",
+          }
+        ]
+      },
+       "Name": {
+        "type": "title",
+        "title": [
+          {
+            ...
+            "plain_text": "Intro",
+          }
+        ]
+      */
+
+  const p = (o as any).properties?.[property];
+  if (!p) return undefined;
+  const textArray = p[p.type];
+  return textArray && textArray.length ? textArray[0].plain_text : undefined;
 }
 
 /**
@@ -256,4 +264,27 @@ function hashOfString(s: string) {
     hash = Math.imul(31, hash) + s.charCodeAt(i);
 
   return Math.abs(hash);
+}
+
+// Download the image if we don't have it, give it a good name, and
+// change the src to point to our copy of the image.
+async function processImageBlock(b: any) {
+  let url = "";
+  if ("file" in b.image) {
+    url = b.image.file.url; // image saved on notion (actually AWS)
+  } else {
+    url = b.image.external.url; // image still pointing somewhere else. I've see this happen when copying a Google Doc into Notion. Notion kep pointing at the google doc.
+  }
+
+  const newPath =
+    kNotionImageDirectoryFromDocusaurusRuntime +
+    "/" +
+    (await saveImage(url, kNotionImageDirectory));
+
+  // change the src to point to our copy of the image
+  if ("file" in b.image) {
+    b.image.file.url = newPath;
+  } else {
+    b.image.external.url = newPath;
+  }
 }

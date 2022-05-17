@@ -1,7 +1,5 @@
 ---
-sidebar_position: 1
-sidebar_label: 'Intro'
+title: Intro
 slug: /
 ---
 
-# Introduction to Bloom Docs

@@ -7470,6 +7470,13 @@ safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.1.0, safe-buffer@^5.1.2, 
   resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
+sanitize-filename@^1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/sanitize-filename/-/sanitize-filename-1.6.3.tgz#755ebd752045931977e30b2025d340d7c9090378"
+  integrity sha512-y/52Mcy7aw3gRm7IrcGDFx/bCk4AhRh2eI9luHOQM86nZsqwiRkkq2GekHXBBD+SmPidc8i2PqtYZl+pWJ8Oeg==
+  dependencies:
+    truncate-utf8-bytes "^1.0.0"
+
 sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.npmjs.org/sax/-/sax-1.2.4.tgz"
@@ -8123,6 +8130,13 @@ trough@^1.0.0:
   resolved "https://registry.npmjs.org/trough/-/trough-1.0.5.tgz"
   integrity sha512-rvuRbTarPXmMb79SmzEp8aqXNKcK+y0XaB298IXueQ8I2PsrATcPBCSPyK/dDNa2iWOhKlfNnOjdAOTBU/nkFA==
 
+truncate-utf8-bytes@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/truncate-utf8-bytes/-/truncate-utf8-bytes-1.0.2.tgz#405923909592d56f78a5818434b0b78489ca5f2b"
+  integrity sha1-QFkjkJWS1W94pYGENLC3hInKXys=
+  dependencies:
+    utf8-byte-length "^1.0.1"
+
 ts-node@^10.7.0:
   version "10.7.0"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.7.0.tgz#35d503d0fab3e2baa672a0e94f4b40653c2463f5"
@@ -8375,6 +8389,11 @@ use-latest@^1.0.0:
   integrity sha512-d2TEuG6nSLKQLAfW3By8mKr8HurOlTkul0sOpxbClIv4SQ4iOd7BYr7VIzdbktUCnv7dua/60xzd8igMU6jmyw==
   dependencies:
     use-isomorphic-layout-effect "^1.0.0"
+
+utf8-byte-length@^1.0.1:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/utf8-byte-length/-/utf8-byte-length-1.0.4.tgz#f45f150c4c66eee968186505ab93fcbb8ad6bf61"
+  integrity sha1-9F8VDExm7uloGGUFq5P8u4rWv2E=
 
 util-deprecate@^1.0.1, util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"

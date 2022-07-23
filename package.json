@@ -28,7 +28,7 @@
     "@notionhq/client": "^1.0.4",
     "@types/fs-extra": "^9.0.13",
     "clsx": "^1.1.1",
-    "file-type": "16.5.1",
+    "file-type": "16.5.4",
     "fs-extra": "^10.1.0",
     "limiter": "^2.1.0",
     "node-fetch": "2.6.6",
